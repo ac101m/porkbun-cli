@@ -25,7 +25,7 @@ Which should contain your api and secret keys respectively. Remember to set appr
 ### Command line:
 The first thing you should probably do is ping the porkbun API to check that your API keys are set up correctly:
 
-`python3 porkbun-cli`
+`python3 porkbun-cli ping`
 
 The tool also has comprehensive help output:
 
