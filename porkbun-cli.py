@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 '''
-[porkbun dynamic DNS updater]
-Dynamic IP got you down? Here's a tool for updating your porkbun domains!
+[porkbun-cli]
+A command line tool for managing and updating your porkbun domains!
 
 Usage:
-  porkbun-updater (-h | --help)
-  porkbun-updater ping [options]
-  porkbun-updater record list <domain>
-  porkbun-updater record create <domain> [--name=<name>] [--type=<type>] [--ttl=<ttl>] [--content=<ip>] [--priority=<prio>] [options]
-  porkbun-updater record edit <domain> <id> [--name=<name>] [--type=<type>] [--ttl=<ttl>] [--content=<ip>] [--priority=<prio>] [options]
-  porkbun-updater record update <domain> <id> [--content=<ip>] [options]
-  porkbun-updater record delete <domain> <id> [options]
+  porkbun-cli (-h | --help)
+  porkbun-cli ping [options]
+  porkbun-cli record list <domain>
+  porkbun-cli record create <domain> [--name=<name>] [--type=<type>] [--ttl=<ttl>] [--content=<ip>] [--priority=<prio>] [options]
+  porkbun-cli record edit <domain> <id> [--name=<name>] [--type=<type>] [--ttl=<ttl>] [--content=<ip>] [--priority=<prio>] [options]
+  porkbun-cli record update <domain> <id> [--content=<ip>] [options]
+  porkbun-cli record delete <domain> <id> [options]
 
 Options:
   -h --help                 Display this help message.
