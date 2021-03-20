@@ -47,11 +47,17 @@ def load_file(path):
 
 
 def get_external_ip():
+    r = requests.get('https://api.ipify.org')
+    if r.status_code != 200:
+        raise RuntimeError('Oh no! Failed to get external IP, response ({})'.format(r.status_code))
+    tokens = r.text.split('.')
+    e = RuntimeError("Oh no! Failed to get external IP, response was invalid:\n{}".format(r.text))
+    if len(tokens) != 4:
+        raise e
     try:
-        return requests.get('https://api.ipify.org').text.strip()
-    except Exception as e:
-        print("Oh no! Could not get external IP! {}".format(e))
-        exit(1)
+        return '{}.{}.{}.{}'.format(*[int(t) for t in tokens])
+    except ValueError:
+        raise e
 
 
 def now():
