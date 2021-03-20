@@ -6,6 +6,7 @@ A command line tool for managing and updating your porkbun domains!
 
 Usage:
   porkbun-cli (-h | --help)
+  porkbun-cli show_ip
   porkbun-cli ping [options]
   porkbun-cli record list <domain>
   porkbun-cli record create <domain> [--name=<name>] [--type=<type>] [--ttl=<ttl>] [--content=<ip>] [--priority=<prio>] [options]
@@ -184,12 +185,15 @@ def record(secretapikey, apikey, args):
 
 
 def run(args):
-    secretapikey = load_file(args['--secretapikey'])
-    apikey = load_file(args['--apikey'])
-    if args['ping']:
-        ping(secretapikey, apikey)
-    elif args['record']:
-        record(secretapikey, apikey, args)
+    if args['ping'] or args['record']:
+        secretapikey = load_file(args['--secretapikey'])
+        apikey = load_file(args['--apikey'])
+        if args['ping']:
+            ping(secretapikey, apikey)
+        else:
+            record(secretapikey, apikey, args)
+    elif args['show_ip']:
+        print(get_external_ip())
 
 
 if __name__ == '__main__':
