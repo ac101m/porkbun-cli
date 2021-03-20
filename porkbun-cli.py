@@ -24,6 +24,8 @@ Options:
 import docopt
 import requests
 import time
+import signal
+from datetime import datetime
 
 import api
 
@@ -49,6 +51,10 @@ def get_external_ip():
     except Exception as e:
         print("Oh no! Could not get external IP! {}".format(e))
         exit(1)
+
+
+def now():
+    return datetime.now().strftime('%b %d %H:%M:%S')
 
 
 def ping(secretapikey, apikey):
@@ -126,16 +132,21 @@ def record_update(secretapikey, apikey, domain, id, content):
 
 
 def record_update_continuous(secretapikey, apikey, domain, id, delay):
+    print('[{}] Updater active! delay: {}s'.format(now(), delay))
+    def sigint_handler(signal, frame):
+        print('[{}] Received SIGINT, stopping updater.'.format(now()))
+        exit(0)
+    signal.signal(signal.SIGINT, sigint_handler)
     record_ip = get_record(secretapikey, apikey, domain, id)['content']
     while True:
         try:
             current_ip = get_external_ip()
             if record_ip != current_ip:
-                print('External IP address does not match record!')
+                print('[{}] External IP address does not match record!'.format(now()))
                 record_update(secretapikey, apikey, domain, id, current_ip)
                 record_ip = current_ip
         except Exception as e:
-            print("Error occurred during update: {}".format(e))
+            print("[{}] Error occurred during update: {}".format(now(), e))
         time.sleep(delay)
 
 
