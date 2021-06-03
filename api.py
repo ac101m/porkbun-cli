@@ -8,27 +8,25 @@ https://porkbun.com/api/json/v3/documentation#Overview
 import requests
 
 
+class PorkbunAPIError(Exception):
+    pass
+
+
 def get_response(argv):
     try:
         endpoint = argv['endpoint']
         argv.pop('endpoint')
         response = requests.post(endpoint, json=argv)
     except Exception as e:
-        print("Oh no! Could not get response from '{}'! {}".format(endpoint, e))
-        exit(1)
+        raise PorkbunAPIError("Oh no! Could not get response from '{}'! {}".format(endpoint, e))
 
     if response.status_code != 200:
-        print("Oh no! Got {} response from '{}'!".format(response.status_code, endpoint))
-        exit(1)
+        raise PorkbunAPIError("Oh no! Got {} response from '{}'!".format(response.status_code, endpoint))
 
     data = response.json()
 
     if data['status'] != 'SUCCESS':
-        print("Oh no! An API error occurred:\n{} - {}".format(
-            data['status'],
-            data['message']
-        ))
-        exit(1)
+        raise PorkbunAPIError("Oh no! An API error occurred:\n{} - {}".format(data['status'], data['message']))
 
     return data
 
