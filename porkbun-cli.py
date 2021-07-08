@@ -144,7 +144,13 @@ def record_update_continuous(secretapikey, apikey, domain, id, delay):
         print('[{}] Received SIGINT, stopping updater.'.format(now()))
         exit(0)
     signal.signal(signal.SIGINT, sigint_handler)
-    record_ip = get_record(secretapikey, apikey, domain, id)['content']
+    record_ip = None
+    while record_ip is None:
+        try:
+            record_ip = get_record(secretapikey, apikey, domain, id)['content']
+        except Exception as e:
+            print("[{}] Failed to get initial record IP: {}".format(now(), e))
+            time.sleep(10)
     while True:
         try:
             current_ip = get_external_ip()
