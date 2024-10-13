@@ -31,6 +31,20 @@ from datetime import datetime
 import api
 
 
+def now():
+    return datetime.now().strftime('%b %d %H:%M:%S')
+
+
+# This is set to false if running the continuous updater
+interactive = True
+
+
+def log(message):
+    if interactive:
+        print(message)
+    else:
+        print('[{}] - {}'.format(now(), message))
+
 
 def rchop(s, suffix):
     if suffix and s.endswith(suffix):
@@ -42,44 +56,31 @@ def load_file(path):
     try:
         return open(path, 'r').read().strip()
     except Exception as e:
-        print("Oh no! Could not open keyfile! {}".format(e))
+        log("Oh no! Could not open keyfile! {}".format(e))
         exit(1)
 
 
-def get_external_ip():
-    r = requests.get('https://api.ipify.org')
-    if r.status_code != 200:
-        raise RuntimeError('Oh no! Failed to get external IP, response ({})'.format(r.status_code))
-    tokens = r.text.split('.')
-    e = RuntimeError("Oh no! Failed to get external IP, response was invalid:\n{}".format(r.text))
-    if len(tokens) != 4:
-        raise e
-    try:
-        return '{}.{}.{}.{}'.format(*[int(t) for t in tokens])
-    except ValueError:
-        raise e
-
-
-def now():
-    return datetime.now().strftime('%b %d %H:%M:%S')
+def get_external_ip(secretapikey, apikey):
+    response = api.ping(secretapikey, apikey)
+    return response['yourIp']
 
 
 def ping(secretapikey, apikey):
-    print('Pinging porkbun...')
+    log('Pinging porkbun...')
     response = api.ping(secretapikey, apikey)
-    print('Porkbun says {}!'.format(response['status']))
+    log('Porkbun says {}!'.format(response['status']))
 
 
 def record_list(secretapikey, apikey, domain):
     response = api.retrieve_records(domain, secretapikey, apikey)
-    print('Showing all records for {}'.format(domain))
+    log('Showing all records for {}'.format(domain))
     for record in response['records']:
-        print('{}:'.format(record['name']))
-        print(' - id: {}'.format(record['id']))
-        print(' - type: {}'.format(record['type']))
-        print(' - content: {}'.format(record['content']))
-        print(' - ttl: {}'.format(record['ttl']))
-        print(' - prio: {}'.format(record['prio']))
+        log('{}:'.format(record['name']))
+        log(' - id: {}'.format(record['id']))
+        log(' - type: {}'.format(record['type']))
+        log(' - content: {}'.format(record['content']))
+        log(' - ttl: {}'.format(record['ttl']))
+        log(' - prio: {}'.format(record['prio']))
 
 
 def record_create(secretapikey, apikey, domain, id, args):
@@ -88,13 +89,13 @@ def record_create(secretapikey, apikey, domain, id, args):
     ttl = args['--ttl'] if args['--ttl'] is not None else '300'
     content = args['--content'] if args['--content'] is not None else get_external_ip()
     prio = args['--priority'] if args['--priority'] is not None else '0'
-    print('Creating new record {}.{}'.format(name, domain))
-    print(' - type: {}'.format(type))
-    print(' - content: {}'.format(content))
-    print(' - ttl: {}'.format(ttl))
-    print(' - prio: {}'.format(prio))
+    log('Creating new record {}.{}'.format(name, domain))
+    log(' - type: {}'.format(type))
+    log(' - content: {}'.format(content))
+    log(' - ttl: {}'.format(ttl))
+    log(' - prio: {}'.format(prio))
     response = api.create_record(domain, secretapikey, apikey, name, type, content, ttl, prio)
-    print('Record created successfully! id: {}'.format(response['id']))
+    log('Record created successfully! id: {}'.format(response['id']))
 
 
 def get_record(secretapikey, apikey, domain, id):
@@ -103,13 +104,13 @@ def get_record(secretapikey, apikey, domain, id):
         if r['id'] == id:
             record = r
     if record is None:
-        print("No record with id '{}' exists!".format(id))
+        log("No record with id '{}' exists!".format(id))
         exit(1)
     return record
 
 
 def record_edit(secretapikey, apikey, domain, id, args):
-    print('Editing record {}/{}'.format(domain, id))
+    log('Editing record {}/{}'.format(domain, id))
     record = get_record(secretapikey, apikey, domain, id)
     name = args['--name'] if args['--name'] is not None else rchop(record['name'], domain)
     type = args['--type'] if args['--type'] is not None else record['type']
@@ -117,56 +118,53 @@ def record_edit(secretapikey, apikey, domain, id, args):
     content = args['--content'] if args['--content'] is not None else record['content']
     prio = args['--priority'] if args['--priority'] is not None else record['prio']
     api.edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio)
-    print('Record updated!')
-    print(' - type: {}'.format(type))
-    print(' - content: {}'.format(content))
-    print(' - ttl: {}'.format(ttl))
-    print(' - prio: {}'.format(prio))
+    log('Record updated!')
+    log(' - type: {}'.format(type))
+    log(' - content: {}'.format(content))
+    log(' - ttl: {}'.format(ttl))
+    log(' - prio: {}'.format(prio))
 
 
 def record_update(secretapikey, apikey, domain, id, content):
-    print("Updating record {}/{}".format(domain, id))
+    log("Updating record {}/{}".format(domain, id))
     record = get_record(secretapikey, apikey, domain, id)
     name = rchop(record['name'], domain).strip('.')
     type = record['type']
     ttl = record['ttl']
     prio = record['prio']
     if record['content'] == content:
-        print('Content unchanged, no update is neccessary!')
+        log('Content unchanged, no update is neccessary!')
     else:
         api.edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio)
-        print('Record updated successfully! New content: {}'.format(content))
+        log('Record updated successfully! New content: {}'.format(content))
 
 
 def record_update_continuous(secretapikey, apikey, domain, id, delay):
-    print('[{}] Updater active! delay: {}s'.format(now(), delay))
+    global interactive
+    interactive = False
+    log('Updater active! delay: {}s'.format(delay))
     def sigint_handler(signal, frame):
-        print('[{}] Received SIGINT, stopping updater.'.format(now()))
+        log('Received SIGINT, stopping updater.')
         exit(0)
     signal.signal(signal.SIGINT, sigint_handler)
-    record_ip = None
-    while record_ip is None:
-        try:
-            record_ip = get_record(secretapikey, apikey, domain, id)['content']
-        except Exception as e:
-            print("[{}] Failed to get initial record IP: {}".format(now(), e))
-            time.sleep(10)
+    last_ip = None
     while True:
         try:
-            current_ip = get_external_ip()
-            if record_ip != current_ip:
-                print('[{}] External IP address does not match record!'.format(now()))
+            current_ip = get_external_ip(secretapikey, apikey)
+            if current_ip != last_ip:
+                log('Updating record to {}'.format(current_ip))
                 record_update(secretapikey, apikey, domain, id, current_ip)
-                record_ip = current_ip
+            last_ip = current_ip
         except Exception as e:
-            print("[{}] Error occurred during update: {}".format(now(), e))
-        time.sleep(delay)
+            log("Error occurred during update: {}".format(e))
+        finally:
+            time.sleep(delay)
 
 
 def record_delete(secretapikey, apikey, domain, id):
-    print('Deleting record {}/{}'.format(domain, id))
+    log('Deleting record {}/{}'.format(domain, id))
     api.delete_record(domain, id, secretapikey, apikey)
-    print('Record deleted.')
+    log('Record deleted.')
 
 
 def record(secretapikey, apikey, args):
@@ -186,10 +184,10 @@ def record(secretapikey, apikey, args):
             try:
                 delay = int(args['--delay'])
             except ValueError as e:
-                print("Oh no! '{}' is not an integer!".format(args['--delay']))
+                log("Oh no! '{}' is not an integer!".format(args['--delay']))
                 exit(1)
             if delay <= 0:
-                print('Oh no! Check frequency must be greater than or equal to zero!')
+                log('Oh no! Check frequency must be greater than or equal to zero!')
             else:
                 record_update_continuous(secretapikey, apikey, domain, id, delay)
     elif args['delete']:
@@ -197,15 +195,16 @@ def record(secretapikey, apikey, args):
 
 
 def run(args):
-    if args['ping'] or args['record']:
-        secretapikey = load_file(args['--secretapikey'])
-        apikey = load_file(args['--apikey'])
-        if args['ping']:
-            ping(secretapikey, apikey)
-        else:
-            record(secretapikey, apikey, args)
+    secretapikey = load_file(args['--secretapikey'])
+    apikey = load_file(args['--apikey'])
+    if args['ping']:
+        ping(secretapikey, apikey)
     elif args['show_ip']:
-        print(get_external_ip())
+        log(get_external_ip(secretapikey, apikey))
+    elif args['record']:
+        record(secretapikey, apikey, args)
+    else:
+        raise RuntimeError("Command not recognized. Arguments: {}".format(args))
 
 
 if __name__ == '__main__':
@@ -213,5 +212,5 @@ if __name__ == '__main__':
     try:
         run(args)
     except Exception as e:
-        print("[{}] Oh no! Terminal exception: {}".format(now(), e))
+        log("Oh no! Terminal exception: {}".format(e))
         exit(1)
