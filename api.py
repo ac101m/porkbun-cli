@@ -8,6 +8,9 @@ https://porkbun.com/api/json/v3/documentation#Overview
 import requests
 
 
+requests.packages.urllib3.util.connection.HAS_IPV6 = False
+
+
 BASE_URL = 'https://api.porkbun.com'
 
 
