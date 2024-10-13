@@ -8,8 +8,15 @@ https://porkbun.com/api/json/v3/documentation#Overview
 import requests
 
 
+BASE_URL = 'https://api.porkbun.com'
+
+
 class PorkbunAPIError(Exception):
     pass
+
+
+def format_url(path):
+    return '{}/{}'.format(BASE_URL, path)
 
 
 def get_response(argv):
@@ -32,20 +39,20 @@ def get_response(argv):
 
 
 def ping(secretapikey, apikey):
-    endpoint = 'https://porkbun.com/api/json/v3/ping'
+    endpoint = format_url('api/json/v3/ping')
     args = {k: v for k, v in locals().items() if v is not None}
     return get_response(args)
 
 
 def create_record(domain, secretapikey, apikey, name, type, content, ttl, prio):
-    endpoint = 'https://porkbun.com/api/json/v3/dns/create/{}'.format(domain)
+    endpoint = format_url('api/json/v3/dns/create/{}'.format(domain))
     args = {k: v for k, v in locals().items() if v is not None}
     args.pop('domain')
     return get_response(args)
 
 
 def edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio):
-    endpoint = 'https://porkbun.com/api/json/v3/dns/edit/{}/{}'.format(domain, id)
+    endpoint = format_url('api/json/v3/dns/edit/{}/{}'.format(domain, id))
     args = {k: v for k, v in locals().items() if v is not None}
     args.pop('domain')
     args.pop('id')
@@ -53,7 +60,7 @@ def edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio
 
 
 def delete_record(domain, id, secretapikey, apikey):
-    endpoint = 'https://porkbun.com/api/json/v3/dns/delete/{}/{}'.format(domain, id)
+    endpoint = format_url('api/json/v3/dns/delete/{}/{}'.format(domain, id))
     args = {k: v for k, v in locals().items() if v is not None}
     args.pop('domain')
     args.pop('id')
@@ -61,7 +68,7 @@ def delete_record(domain, id, secretapikey, apikey):
 
 
 def retrieve_records(domain, secretapikey, apikey):
-    endpoint = 'https://porkbun.com/api/json/v3/dns/retrieve/{}'.format(domain)
+    endpoint = format_url('api/json/v3/dns/retrieve/{}'.format(domain))
     args = {k: v for k, v in locals().items() if v is not None}
     args.pop('domain')
     return get_response(args)
