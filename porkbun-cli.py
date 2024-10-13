@@ -209,4 +209,9 @@ def run(args):
 
 
 if __name__ == '__main__':
-    run(docopt.docopt(__doc__))
+    args = docopt.docopt(__doc__)
+    try:
+        run(args)
+    except Exception as e:
+        print("[{}] Oh no! Terminal exception: {}".format(now(), e))
+        exit(1)
