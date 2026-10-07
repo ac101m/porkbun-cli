@@ -23,7 +23,6 @@ Options:
 '''
 
 import docopt
-import requests
 import time
 import signal
 from datetime import datetime
