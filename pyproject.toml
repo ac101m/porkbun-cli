@@ -3,6 +3,6 @@ name = "porkbun-cli"
 version = "0.0.1"
 requires-python = ">=3.10"
 dependencies = [
-    "docopt-ng",
+    "docopt-ng>=0.9.0",
     "requests>=2.34.2",
 ]
