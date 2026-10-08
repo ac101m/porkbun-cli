@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
 [porkbun-cli]
 A command line tool for managing and updating your porkbun domains!
 
@@ -20,8 +20,9 @@ Options:
                             the update command will run periodically rather than just once.
   --apikey=<path>           Path to api key file. [default: api-key]
   --secretapikey=<path>     Path to secret api key file. [default: secret-api-key]
-'''
+"""
 
+# noinspection PyPackageRequirements
 import docopt
 import time
 import signal
@@ -59,19 +60,19 @@ def load_file(path):
         exit(1)
 
 
-def get_external_ip(secretapikey, apikey):
-    response = api.ping(secretapikey, apikey)
+def get_external_ip(secret_api_key, api_key):
+    response = api.ping(secret_api_key, api_key)
     return response['yourIp']
 
 
-def ping(secretapikey, apikey):
+def ping(secret_api_key, api_key):
     log('Pinging porkbun...')
-    response = api.ping(secretapikey, apikey)
+    response = api.ping(secret_api_key, api_key)
     log('Porkbun says {}!'.format(response['status']))
 
 
-def record_list(secretapikey, apikey, domain):
-    response = api.retrieve_records(domain, secretapikey, apikey)
+def record_list(secret_api_key, api_key, domain):
+    response = api.retrieve_records(domain, secret_api_key, api_key)
     log('Showing all records for {}'.format(domain))
     for record in response['records']:
         log('{}:'.format(record['name']))
@@ -82,7 +83,7 @@ def record_list(secretapikey, apikey, domain):
         log(' - prio: {}'.format(record['prio']))
 
 
-def record_create(secretapikey, apikey, domain, id, args):
+def record_create(secret_api_key, api_key, domain, id, args):
     name = args['--name'] if args['--name'] is not None else ''
     type = args['--type'] if args['--type'] is not None else 'A'
     ttl = args['--ttl'] if args['--ttl'] is not None else '300'
@@ -93,13 +94,13 @@ def record_create(secretapikey, apikey, domain, id, args):
     log(' - content: {}'.format(content))
     log(' - ttl: {}'.format(ttl))
     log(' - prio: {}'.format(prio))
-    response = api.create_record(domain, secretapikey, apikey, name, type, content, ttl, prio)
+    response = api.create_record(domain, secret_api_key, api_key, name, type, content, ttl, prio)
     log('Record created successfully! id: {}'.format(response['id']))
 
 
-def get_record(secretapikey, apikey, domain, id):
+def get_record(secret_api_key, api_key, domain, id):
     record = None
-    for r in api.retrieve_records(domain, secretapikey, apikey)['records']:
+    for r in api.retrieve_records(domain, secret_api_key, api_key)['records']:
         if r['id'] == id:
             record = r
     if record is None:
@@ -108,15 +109,15 @@ def get_record(secretapikey, apikey, domain, id):
     return record
 
 
-def record_edit(secretapikey, apikey, domain, id, args):
+def record_edit(secret_api_key, api_key, domain, id, args):
     log('Editing record {}/{}'.format(domain, id))
-    record = get_record(secretapikey, apikey, domain, id)
+    record = get_record(secret_api_key, api_key, domain, id)
     name = args['--name'] if args['--name'] is not None else rchop(record['name'], domain)
     type = args['--type'] if args['--type'] is not None else record['type']
     ttl = args['--ttl'] if args['--ttl'] is not None else record['ttl']
     content = args['--content'] if args['--content'] is not None else record['content']
     prio = args['--priority'] if args['--priority'] is not None else record['prio']
-    api.edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio)
+    api.edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio)
     log('Record updated!')
     log(' - type: {}'.format(type))
     log(' - content: {}'.format(content))
@@ -124,9 +125,9 @@ def record_edit(secretapikey, apikey, domain, id, args):
     log(' - prio: {}'.format(prio))
 
 
-def record_update(secretapikey, apikey, domain, id, content):
+def record_update(secret_api_key, api_key, domain, id, content):
     log("Updating record {}/{}".format(domain, id))
-    record = get_record(secretapikey, apikey, domain, id)
+    record = get_record(secret_api_key, api_key, domain, id)
     name = rchop(record['name'], domain).strip('.')
     type = record['type']
     ttl = record['ttl']
@@ -134,11 +135,11 @@ def record_update(secretapikey, apikey, domain, id, content):
     if record['content'] == content:
         log('Content unchanged, no update is neccessary!')
     else:
-        api.edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio)
+        api.edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio)
         log('Record updated successfully! New content: {}'.format(content))
 
 
-def record_update_continuous(secretapikey, apikey, domain, id, delay):
+def record_update_continuous(secret_api_key, api_key, domain, id, delay):
     global interactive
     interactive = False
     log('Updater active! delay: {}s'.format(delay))
@@ -149,10 +150,10 @@ def record_update_continuous(secretapikey, apikey, domain, id, delay):
     last_ip = None
     while True:
         try:
-            current_ip = get_external_ip(secretapikey, apikey)
+            current_ip = get_external_ip(secret_api_key, api_key)
             if current_ip != last_ip:
                 log('Updating record to {}'.format(current_ip))
-                record_update(secretapikey, apikey, domain, id, current_ip)
+                record_update(secret_api_key, api_key, domain, id, current_ip)
             last_ip = current_ip
         except Exception as e:
             log("Error occurred during update: {}".format(e))
@@ -160,25 +161,25 @@ def record_update_continuous(secretapikey, apikey, domain, id, delay):
             time.sleep(delay)
 
 
-def record_delete(secretapikey, apikey, domain, id):
+def record_delete(secret_api_key, api_key, domain, id):
     log('Deleting record {}/{}'.format(domain, id))
-    api.delete_record(domain, id, secretapikey, apikey)
+    api.delete_record(domain, id, secret_api_key, api_key)
     log('Record deleted.')
 
 
-def record(secretapikey, apikey, args):
+def record(secret_api_key, api_key, args):
     id = args['<id>']
     domain = args['<domain>']
     if args['list']:
-        record_list(secretapikey, apikey, domain)
+        record_list(secret_api_key, api_key, domain)
     elif args['create']:
-        record_create(secretapikey, apikey, domain, id, args)
+        record_create(secret_api_key, api_key, domain, id, args)
     elif args['edit']:
-        record_edit(secretapikey, apikey, domain, id, args)
+        record_edit(secret_api_key, api_key, domain, id, args)
     elif args['update']:
         if args['--delay'] is None:
             content = args['--content'] if args['--content'] is not None else get_external_ip()
-            record_update(secretapikey, apikey, domain, id, content)
+            record_update(secret_api_key, api_key, domain, id, content)
         else:
             try:
                 delay = int(args['--delay'])
@@ -188,20 +189,20 @@ def record(secretapikey, apikey, args):
             if delay <= 0:
                 log('Oh no! Check frequency must be greater than or equal to zero!')
             else:
-                record_update_continuous(secretapikey, apikey, domain, id, delay)
+                record_update_continuous(secret_api_key, api_key, domain, id, delay)
     elif args['delete']:
-        record_delete(secretapikey, apikey, domain, id)
+        record_delete(secret_api_key, api_key, domain, id)
 
 
 def run(args):
-    secretapikey = load_file(args['--secretapikey'])
-    apikey = load_file(args['--apikey'])
+    secret_api_key = load_file(args['--secretapikey'])
+    api_key = load_file(args['--apikey'])
     if args['ping']:
-        ping(secretapikey, apikey)
+        ping(secret_api_key, api_key)
     elif args['show_ip']:
-        log(get_external_ip(secretapikey, apikey))
+        log(get_external_ip(secret_api_key, api_key))
     elif args['record']:
-        record(secretapikey, apikey, args)
+        record(secret_api_key, api_key, args)
     else:
         raise RuntimeError("Command not recognized. Arguments: {}".format(args))
 

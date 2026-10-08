@@ -41,37 +41,51 @@ def get_response(argv):
     return data
 
 
-def ping(secretapikey, apikey):
+def ping(secret_api_key, api_key):
     endpoint = format_url('api/json/v3/ping')
-    args = {k: v for k, v in locals().items() if v is not None}
+    args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
     return get_response(args)
 
 
-def create_record(domain, secretapikey, apikey, name, type, content, ttl, prio):
+def create_record(domain, secret_api_key, api_key, name, type, content, ttl, prio):
     endpoint = format_url('api/json/v3/dns/create/{}'.format(domain))
-    args = {k: v for k, v in locals().items() if v is not None}
-    args.pop('domain')
+    args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
+    if name is not None:
+        args['name'] = name
+    if type is not None:
+        args['type'] = type
+    if content is not None:
+        args['content'] = content
+    if ttl is not None:
+        args['ttl'] = ttl
+    if prio is not None:
+        args['prio'] = prio
     return get_response(args)
 
 
-def edit_record(domain, id, secretapikey, apikey, name, type, content, ttl, prio):
+def edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio):
     endpoint = format_url('api/json/v3/dns/edit/{}/{}'.format(domain, id))
-    args = {k: v for k, v in locals().items() if v is not None}
-    args.pop('domain')
-    args.pop('id')
+    args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
+    if name is not None:
+        args['name'] = name
+    if type is not None:
+        args['type'] = type
+    if content is not None:
+        args['content'] = content
+    if ttl is not None:
+        args['ttl'] = ttl
+    if prio is not None:
+        args['prio'] = prio
     return get_response(args)
 
 
-def delete_record(domain, id, secretapikey, apikey):
+def delete_record(domain, id, secret_api_key, api_key):
     endpoint = format_url('api/json/v3/dns/delete/{}/{}'.format(domain, id))
-    args = {k: v for k, v in locals().items() if v is not None}
-    args.pop('domain')
-    args.pop('id')
+    args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
     return get_response(args)
 
 
-def retrieve_records(domain, secretapikey, apikey):
+def retrieve_records(domain, secret_api_key, api_key):
     endpoint = format_url('api/json/v3/dns/retrieve/{}'.format(domain))
-    args = {k: v for k, v in locals().items() if v is not None}
-    args.pop('domain')
+    args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
     return get_response(args)
