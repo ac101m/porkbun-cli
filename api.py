@@ -1,9 +1,9 @@
-'''
+"""
 This file implements functions for interacting with the porkbun API.
 
 See here for documentation:
 https://porkbun.com/api/json/v3/documentation#Overview
-'''
+"""
 
 import requests
 
@@ -22,11 +22,11 @@ def format_url(path):
     return '{}/{}'.format(BASE_URL, path)
 
 
-def get_response(argv):
+def get_response(argv, timeout):
     try:
         endpoint = argv['endpoint']
         argv.pop('endpoint')
-        response = requests.post(endpoint, json=argv)
+        response = requests.post(endpoint, json=argv, timeout=timeout)
     except Exception as e:
         raise PorkbunAPIError("Oh no! Could not get response from '{}'! {}".format(endpoint, e))
 
@@ -41,13 +41,13 @@ def get_response(argv):
     return data
 
 
-def ping(secret_api_key, api_key):
+def ping(secret_api_key, api_key, timeout):
     endpoint = format_url('api/json/v3/ping')
     args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
-    return get_response(args)
+    return get_response(args, timeout)
 
 
-def create_record(domain, secret_api_key, api_key, name, type, content, ttl, prio):
+def create_record(domain, secret_api_key, api_key, name, type, content, ttl, prio, timeout):
     endpoint = format_url('api/json/v3/dns/create/{}'.format(domain))
     args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
     if name is not None:
@@ -60,10 +60,10 @@ def create_record(domain, secret_api_key, api_key, name, type, content, ttl, pri
         args['ttl'] = ttl
     if prio is not None:
         args['prio'] = prio
-    return get_response(args)
+    return get_response(args, timeout)
 
 
-def edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio):
+def edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio, timeout):
     endpoint = format_url('api/json/v3/dns/edit/{}/{}'.format(domain, id))
     args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
     if name is not None:
@@ -76,16 +76,16 @@ def edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, p
         args['ttl'] = ttl
     if prio is not None:
         args['prio'] = prio
-    return get_response(args)
+    return get_response(args, timeout)
 
 
-def delete_record(domain, id, secret_api_key, api_key):
+def delete_record(domain, id, secret_api_key, api_key, timeout):
     endpoint = format_url('api/json/v3/dns/delete/{}/{}'.format(domain, id))
     args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
-    return get_response(args)
+    return get_response(args, timeout)
 
 
-def retrieve_records(domain, secret_api_key, api_key):
+def retrieve_records(domain, secret_api_key, api_key, timeout):
     endpoint = format_url('api/json/v3/dns/retrieve/{}'.format(domain))
     args = {'endpoint': endpoint, 'secretapikey': secret_api_key, 'apikey': api_key}
-    return get_response(args)
+    return get_response(args, timeout)
