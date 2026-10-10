@@ -9,7 +9,7 @@ A simple command line interface for managing your porkbun domains.
 	 - Periodically, to pick changes in external address (useful if you have a dynamic IP)
 
 ## Dependencies
-- docopt (`python3 -m pip install docopt`)
+- docopt-ng (`python3 -m pip install docopt-ng`)
 
 That's it!
 
@@ -25,11 +25,11 @@ Which should contain your api and secret keys respectively. Remember to set appr
 ### Command line:
 The first thing you should probably do is ping the porkbun API to check that your API keys are set up correctly:
 
-`python3 porkbun-cli ping`
+`python3 src/porkbun-cli ping`
 
 The tool also has comprehensive help output:
 
-`python3 porkbun-cli -h`
+`python3 src/porkbun-cli -h`
 
 If you are unfamiliar with command line interfaces like this one and find the help message confusing, then here is a brief summary:
 - `<>` Indicates an input field
@@ -44,11 +44,22 @@ This tool can be used to create a dynamic updater that will update the content o
 
 For example, the following command will check your external IP address every 5 seconds and update the specified record if the IP changes:
 
-`python3 porkbun-cli record update <domain> <record-id> --delay=5`
+`python3 src/porkbun-cli record update <domain> <record-id> --delay=5`
 
 The record id can be obtained by listing the records associated with your domain:
 
-`python3 porkbun-cli record list <domain>`
+`python3 src/porkbun-cli record list <domain>`
 
 ### Installation as a systemd unit:
 TODO
+
+## Testing:
+The tests exercise the real Porkbun API, so they need developer-provided credentials. Create the following files in the project root (all gitignored, never committed):
+
+- `api-key` - your Porkbun API key
+- `secret-api-key` - your Porkbun secret API key
+- `test-domain` - a domain the keys are authorized to manipulate
+
+If any of these are missing, the test run aborts with an error explaining what to provide. Run the suite with:
+
+`uv run pytest`

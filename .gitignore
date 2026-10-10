@@ -3,3 +3,5 @@ secret-api-key
 __pycache__
 .idea
 .venv
+test-domain
+.pytest_cache
