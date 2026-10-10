@@ -113,7 +113,7 @@ def get_record(secret_api_key, api_key, domain, id, timeout):
 def record_edit(secret_api_key, api_key, domain, id, args, timeout):
     log('Editing record {}/{}'.format(domain, id))
     record = get_record(secret_api_key, api_key, domain, id, timeout)
-    name = args['--name'] if args['--name'] is not None else rchop(record['name'], domain)
+    name = args['--name'] if args['--name'] is not None else rchop(record['name'], domain).strip('.')
     type = args['--type'] if args['--type'] is not None else record['type']
     ttl = args['--ttl'] if args['--ttl'] is not None else record['ttl']
     content = args['--content'] if args['--content'] is not None else record['content']

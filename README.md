@@ -63,3 +63,5 @@ The tests exercise the real Porkbun API, so they need developer-provided credent
 If any of these are missing, the test run aborts with an error explaining what to provide. Run the suite with:
 
 `uv run pytest`
+
+Note that the tests are live: they call the real Porkbun API and create, edit and delete real records under your test domain (always cleaned up again afterwards). Each test run uses uniquely-named records so runs never collide. To be considerate of Porkbun's servers, the suite pauses for 1 second before every API request, so a full run takes a little while.
