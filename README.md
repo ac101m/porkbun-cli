@@ -24,11 +24,11 @@ That's it! All the example commands below run through uv, so they automatically 
 
 `uv run python src/porkbun-cli -h`
 
-Alternatively, you may also activate it manually and invoke directly like so:
+Alternatively, you may also activate the virtual environment manually and invoke the tool directly like so:
 
 ```bash
 . .venv/bin/activate
-python src/porkbun-cli -h
+python src/porkbun-cli.py -h
 ```
 
 ## Usage:
