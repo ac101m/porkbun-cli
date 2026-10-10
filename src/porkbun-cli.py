@@ -29,6 +29,11 @@ import time
 import signal
 from datetime import datetime
 
+# The api functions used below are always called via attribute lookup
+# (`api.<name>(...)`), never via `from api import <name>`. The test suite
+# patches these functions directly on the api module (see tests/safety.py);
+# attribute calls resolve at call time, so those patches - notably the
+# record-safety gate - take effect. Keep the calls in this style.
 import api
 
 
@@ -95,6 +100,7 @@ def record_create(secret_api_key, api_key, domain, args, timeout):
     log(' - content: {}'.format(content))
     log(' - ttl: {}'.format(ttl))
     log(' - prio: {}'.format(prio))
+    # Attribute call - see the note above `import api`.
     response = api.create_record(domain, secret_api_key, api_key, name, type, content, ttl, prio, timeout)
     log('Record created successfully! id: {}'.format(response['id']))
 
@@ -118,6 +124,7 @@ def record_edit(secret_api_key, api_key, domain, id, args, timeout):
     ttl = args['--ttl'] if args['--ttl'] is not None else record['ttl']
     content = args['--content'] if args['--content'] is not None else record['content']
     prio = args['--priority'] if args['--priority'] is not None else record['prio']
+    # Attribute call - see the note above `import api`.
     api.edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio, timeout)
     log('Record updated!')
     log(' - type: {}'.format(type))
@@ -136,6 +143,7 @@ def record_update(secret_api_key, api_key, domain, id, content, timeout):
     if record['content'] == content:
         log('Content unchanged, no update is neccessary!')
     else:
+        # Attribute call - see the note above `import api`.
         api.edit_record(domain, id, secret_api_key, api_key, name, type, content, ttl, prio, timeout)
         log('Record updated successfully! New content: {}'.format(content))
 
@@ -164,6 +172,7 @@ def record_update_continuous(secret_api_key, api_key, domain, id, delay, timeout
 
 def record_delete(secret_api_key, api_key, domain, id, timeout):
     log('Deleting record {}/{}'.format(domain, id))
+    # Attribute call - see the note above `import api`.
     api.delete_record(domain, id, secret_api_key, api_key, timeout)
     log('Record deleted.')
 
