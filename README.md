@@ -9,9 +9,27 @@ A simple command line interface for managing your porkbun domains.
 	 - Periodically, to pick changes in external address (useful if you have a dynamic IP)
 
 ## Dependencies
-- docopt-ng (`python3 -m pip install docopt-ng`)
+The project uses [uv](https://docs.astral.sh/uv/) to manage its virtual environment and dependencies. If you don't have
+uv installed yet, install it with either:
 
-That's it!
+- `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- `python3 -m pip install uv`
+
+## Virtual environment setup
+From the project root, create the `.venv` virtual environment and install all dependencies with:
+
+`uv sync`
+
+That's it! All the example commands below run through uv, so they automatically use this environment - no activation or manual package installation is required.
+
+`uv run python src/porkbun-cli -h`
+
+Alternatively, you may also activate it manually and invoke directly like so:
+
+```bash
+. .venv/bin/activate
+python src/porkbun-cli -h
+```
 
 ## Usage:
 ### Setup:
@@ -25,11 +43,11 @@ Which should contain your api and secret keys respectively. Remember to set appr
 ### Command line:
 The first thing you should probably do is ping the porkbun API to check that your API keys are set up correctly:
 
-`python3 src/porkbun-cli ping`
+`uv run python src/porkbun-cli ping`
 
 The tool also has comprehensive help output:
 
-`python3 src/porkbun-cli -h`
+`uv run python src/porkbun-cli -h`
 
 If you are unfamiliar with command line interfaces like this one and find the help message confusing, then here is a brief summary:
 - `<>` Indicates an input field
@@ -44,11 +62,11 @@ This tool can be used to create a dynamic updater that will update the content o
 
 For example, the following command will check your external IP address every 5 seconds and update the specified record if the IP changes:
 
-`python3 src/porkbun-cli record update <domain> <record-id> --delay=5`
+`uv run python src/porkbun-cli record update <domain> <record-id> --delay=5`
 
 The record id can be obtained by listing the records associated with your domain:
 
-`python3 src/porkbun-cli record list <domain>`
+`uv run python src/porkbun-cli record list <domain>`
 
 ### Installation as a systemd unit:
 TODO
